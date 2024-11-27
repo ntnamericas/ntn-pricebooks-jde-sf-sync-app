@@ -1,7 +1,7 @@
 sf:
-  user: "mulesoftintegration@ntnusa.com.stage"
+  username: "mulesoftintegration@ntnusa.com.stage"
   authURL : "https://test.salesforce.com/services/Soap/u/56.0"
-  tokenURL: "https://ntnconnect--stage.sandbox.my.salesforce.com/services/oauth2/token"
+  tokenEndpoint: "https://ntnconnect--stage.sandbox.my.salesforce.com/services/oauth2/token"
   
 db:
   host: "129.147.16.139"
