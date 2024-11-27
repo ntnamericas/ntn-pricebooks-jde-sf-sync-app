@@ -1,0 +1,45 @@
+#Common properties
+common:
+  errors:
+    error-code-400: "BAD_REQUEST"
+    error-code-404: "NOT_FOUND"
+    error-code-405: "METHOD_NOT_ALLOWED"
+    error-code-406: "NOT_ACCEPTABLE"
+    error-code-415: "UNSUPPORTED_MEDIA_TYPE"
+    error-code-500: "INTERNAL_SERVER_ERROR"
+    error-code-501: "NOT_IMPLEMENTED"
+    
+#untilsuccessful
+untilSuccess:
+  retries: "2"
+  timeInterval: "3000"    
+
+#Logger category
+log.level: "INFO"
+log.category: "TRACKING"
+
+#Source and Target Names
+  
+ 
+
+#DB query timeout Details
+query:
+  timeout: "10"
+  timeoutUnit: "MINUTES" 
+  maxRows: "30000"  
+  
+scheduler:
+  frequency: "30"
+  startDelay: "0"
+
+salesforce:
+  object: "Account"
+  externalId: "JDE_AddressNumber__c"
+  
+http:
+  host: "0.0.0.0"
+  port: "8081"
+  timeout: "30000"
+  url: "/pricebooks"
+  basePath: "/api/*"
+    

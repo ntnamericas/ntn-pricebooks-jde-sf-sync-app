@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:salesforce-composite="http://www.mulesoft.org/schema/mule/salesforce-composite"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:os="http://www.mulesoft.org/schema/mule/os"
+	xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties"
+	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd 
+http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+http://www.mulesoft.org/schema/mule/salesforce-composite http://www.mulesoft.org/schema/mule/salesforce-composite/current/mule-salesforce-composite.xsd">
+	<http:listener-config
+		name="ntn-pricebooks-sf-sapi-httpListenerConfig">
+		<http:listener-connection host="${http.host}"
+			port="${http.port}" readTimeout="${http.timeout}" />
+	</http:listener-config>
+	<salesforce:sfdc-config name="Salesforce_Config"
+		doc:name="Salesforce Config"
+		doc:id="40b7db49-8cdf-433f-839c-dcd8c78e28e5">
+		<salesforce:oauth-user-pass-connection
+			consumerKey="${secure::sf.consumerKey}"
+			consumerSecret="${secure::sf.consumerSecret}"
+			username="${sf.username}" password="${secure::sf.password}"
+			securityToken="${secure::sf.securityToken}"
+			tokenEndpoint="${sf.tokenEndpoint}" >
+			<reconnection failsDeployment="true" >
+				<reconnect-forever />
+			</reconnection>
+		</salesforce:oauth-user-pass-connection>
+	</salesforce:sfdc-config>
+	<db:config name="Oracle_JDE_Database_Config"
+		doc:name="Database Config"
+		doc:id="99b11b76-b438-4d03-a106-207d5131eea2">
+		<db:oracle-connection host="${db.host}"
+			user="${secure::db.user}" password="${secure::db.password}"
+			serviceName="${db.svc}" port="${db.port}">
+			<reconnection failsDeployment="true">
+				<reconnect-forever />
+			</reconnection>
+		</db:oracle-connection>
+	</db:config>
+	<apikit:config name="ntn-pricebooks-sf-sapi-config"
+		api="ntn-pricebooks-sf-sapi.raml"
+		outboundHeadersMapName="outboundHeaders"
+		httpStatusVarName="httpStatus" />
+	<configuration-properties
+		doc:name="Configuration properties"
+		doc:id="21402cc1-df9c-4937-a67e-bb647c24b04b"
+		file="properties/common.yaml" />
+	<configuration-properties
+		doc:name="Configuration properties"
+		doc:id="4be647f1-7abf-40fc-ad85-b72607240859"
+		file="properties/${env}-properties.yaml" />
+	<secure-properties:config
+		name="Secure_Properties_Config" doc:name="Secure Properties Config"
+		doc:id="f26cf4a9-3202-4515-abd3-2f9d729e247f"
+		file="properties/${env}-secure-properties.yaml" key="${encrypt.key}">
+		<secure-properties:encrypt
+			algorithm="Blowfish" />
+	</secure-properties:config>
+	<os:config name="ObjectStore_Config"
+		doc:name="ObjectStore Config"
+		doc:id="c4a73a20-5b7c-4531-8394-d092263f1366">
+		<os:connection />
+	</os:config>
+	<os:object-store
+		name="Object_store_Previous_pb_Job_Run" doc:name="Object store"
+		doc:id="9b7b3ede-cfaf-4d4f-8e92-53aa25bd7bcf" entryTtl="3"
+		entryTtlUnit="DAYS" expirationIntervalUnit="DAYS"
+		config-ref="ObjectStore_Config" />
+	<salesforce-composite:composite-config name="Salesforce_Composite_Config" doc:name="Salesforce Composite Config" doc:id="591336b2-19dd-4712-932c-f78bb2359df1" >
+		<salesforce-composite:oauth-user-pass-connection consumerKey="${secure::sf.consumerKey}" consumerSecret="${secure::sf.consumerSecret}" username="${sf.username}" password="${secure::sf.password}" securityToken="${secure::sf.securityToken}" tokenEndpoint="${sf.tokenEndpoint}" />
+	</salesforce-composite:composite-config>
+</mule>

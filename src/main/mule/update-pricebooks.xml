@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:batch="http://www.mulesoft.org/schema/mule/batch"
+	xmlns:aggregators="http://www.mulesoft.org/schema/mule/aggregators" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:salesforce-composite="http://www.mulesoft.org/schema/mule/salesforce-composite"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/salesforce-composite http://www.mulesoft.org/schema/mule/salesforce-composite/current/mule-salesforce-composite.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/aggregators http://www.mulesoft.org/schema/mule/aggregators/current/mule-aggregators.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd">
+	<flow name="pricebook-schedule-flow"
+		doc:id="88f58918-100c-4130-b1c9-8e6860afceda">
+		<scheduler doc:name="Scheduler" doc:id="77646c6c-2913-4a09-bfe9-8bf6de25763f" >
+			<scheduling-strategy >
+				<fixed-frequency frequency="${scheduler.frequency}" timeUnit="DAYS" startDelay="${scheduler.startDelay}"/>
+			</scheduling-strategy>
+		</scheduler>
+		<ee:transform doc:name="jobRunTime"
+			doc:id="3cce62c8-929d-42b2-a022-128088f8ea4c">
+			<ee:message />
+			<ee:variables>
+				<ee:set-variable resource="dwl/vars-pbJobRun.dwl" variableName="pbJobRun" />
+			
+
+
+</ee:variables>
+		</ee:transform>
+		<logger level="INFO" doc:name="jobRun logger" doc:id="cfb2f379-e447-48dd-8c0a-d7ab1ef52e6b" message="#[vars.pbJobRun]" category="${log.category}"/>
+		<os:retrieve doc:name="retrievePreviousJobRun"
+			doc:id="8cfe8ccc-7187-4af6-ad58-5273aea49dcb" key="previousPbJobRun"
+			target="previousPbJobRun" objectStore="Object_store_Previous_pb_Job_Run">
+			<os:default-value><![CDATA[#[vars.pbJobRun]]]></os:default-value>
+		</os:retrieve>
+		<logger level="INFO" doc:name="Logger" doc:id="df399b36-638d-4865-811e-283e4e6ca4a8" message='Calling "update-pricebooksFlow"' category="${log.category}"/>
+		<flow-ref doc:name="update-pricebooksFlow"
+			doc:id="b64b0e95-f84e-40eb-a944-12e0915b1f1c" name="update-pricebooks-subflow" />
+		<os:store doc:name="Store current job run details"
+			doc:id="a418697f-6d26-4186-892d-33729d7ecd89" key="previousPbJobRun" objectStore="Object_store_Previous_pb_Job_Run">
+			<os:value><![CDATA[#[vars.pbJobRun]]]></os:value>
+		</os:store>
+	
+</flow>
+	<sub-flow name="update-pricebooks-subflow" doc:id="12ca1887-b2eb-4d33-a762-d4872eaa7fe2">
+		<ee:transform doc:name="Transform Message" doc:id="3f9800a6-07ad-4ad7-8984-c5776341ec81">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output text/plain
+---
+readUrl("classpath://queryScript/sqlScript-pbUpdate-consolidated-$(p('mule.env')).dwl","text/plain")]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:dynamic-evaluate doc:name="Dynamic Evaluate" doc:id="eddac08e-b83a-45e1-8a54-5d3f9829f807" expression="#[payload]" />
+		<db:select doc:name="Select" doc:id="b00f2832-196b-4e77-9fcc-3368ba2e8bd8" config-ref="Oracle_JDE_Database_Config">
+			<db:sql><![CDATA[#[payload]]]></db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="bf0e2fd3-112d-40a2-b7b6-c08489d58294">
+			<ee:message>
+				<ee:set-payload resource="dwl/transform-dbresulset.dwl" />
+			</ee:message>
+			<!-- <ee:variables >
+				<ee:set-variable variableName="drawExternalID" ><![CDATA[%dw 2.0
+output application/json
+-&#45;&#45;
+vars.pricebooksResultSet map (item, index) -> (
+{
+     drawExternalID: if ((trim(item.IMDRAW) != "") and trim(item.IBPRP1 != "") and trim(item.IBSRP4 != "")) ( trim(item.IMDRAW) ++ "-" ++ trim(item.IBPRP1) ++ "-" ++ trim(item.IBSRP4)) else "",
+    "unitPrice": item.BPUPRC,
+}) distinctBy $]]></ee:set-variable>
+				<ee:set-variable variableName="srtxExternalID" ><![CDATA[%dw 2.0
+output application/json
+-&#45;&#45;
+vars.pricebooksResultSet map (item, index) -> (
+{
+    srtxExternalID : if (trim(item.IMSRTX) != "") (if ((["1801","1802"] contains (trim(item.IBMCU)))) ((trim(item.IMSRTX) ++ "-NTN-NBCC"))  else ((trim(item.IMSRTX) ++ "-NTN-NTN"))) else "",
+    "unitPrice": item.BPUPRC,
+}) distinctBy $]]></ee:set-variable> -->
+			<ee:variables>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="update-base-part-price" doc:id="f01bca4b-6293-454d-a5ab-0e3460fcf99b" name="update-part-price" />
+		<logger level="INFO" doc:name="Logger" doc:id="8e578b7b-8772-415b-be16-65480b5e5ba0" message="#[payload]" />
+	</sub-flow>
+	<sub-flow name="update-part-price" doc:id="99a55df2-0d5c-4e31-a749-5a21d1385c05">
+		<choice doc:name="Choice" doc:id="1de1e9e0-7157-4e41-9594-afddee75749a">
+			<when expression="#[payload !=[]]">
+				<logger level="INFO" doc:name="Logger" doc:id="cbe2ffa0-86d7-4401-8b49-4eed28a21d17" message="Base Part Pricebook Upsert Started" />
+				<scatter-gather doc:name="Scatter-Gather" doc:id="581bfd17-3606-4302-add9-384cc0190e70" >
+					<route >
+						<batch:job jobName="batch-update-base-part-price" doc:id="1a247ada-cb80-49a1-951a-6ef81fd4c004">
+					<batch:process-records>
+						<batch:step name="batch-step-for-draw" doc:id="2a870735-4fd5-4bf8-ae6d-0c3b1eca57db" acceptExpression='#[payload.drawExternalID != null  and payload.drawExternalID !="" and payload.drawExternalID != []  ]'>
+							<ee:transform doc:name="Transform Message" doc:id="b31b8145-971b-422d-b2cf-881a0beb5e52">
+								<ee:message>
+									<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+								</ee:message>
+							</ee:transform>
+							<ee:transform doc:name="base-part-query" doc:id="28465806-e2e2-4fc1-940d-eb0e203cb942">
+						<ee:message>
+						</ee:message>
+						<ee:variables>
+											<ee:set-variable resource="dwl/var-base-compositeQuery34.dwl" variableName="compositeQuery34" />
+											<ee:set-variable resource="dwl/var-base-compositeQuery1415.dwl" variableName="compositeQuery1415" />
+						</ee:variables>
+					</ee:transform>
+							<scatter-gather doc:name="Scatter-Gather" doc:id="ad0f5921-a43e-4084-8a1d-2f16c7a2c925">
+								<route>
+									<salesforce-composite:execute-composite-request doc:name="pricebookentry-id-3-4" doc:id="5e0e17cc-ce8c-4e95-953c-1fcf6253ea2c" config-ref="Salesforce_Composite_Config" target="compositeResponsePB34">
+						<salesforce-composite:request-body><![CDATA[#[vars.compositeQuery34]]]></salesforce-composite:request-body>
+					</salesforce-composite:execute-composite-request>
+								</route>
+								<route>
+									<salesforce-composite:execute-composite-request doc:name="pricebookentry-id-14-15" doc:id="9c54b87a-82c3-4ba1-8268-739f15e24d64" config-ref="Salesforce_Composite_Config" target="compositeResponsePB1415">
+						<salesforce-composite:request-body><![CDATA[#[vars.compositeQuery1415]]]></salesforce-composite:request-body>
+					</salesforce-composite:execute-composite-request>
+								</route>
+							</scatter-gather>
+							<ee:transform doc:name="Transform Message" doc:id="61c60f0f-df2c-42ea-baaa-b0650a647614">
+						<ee:message>
+											<ee:set-payload resource="dwl/combined-base-compositeResponse.dwl" />
+						</ee:message>
+						<ee:variables>
+						</ee:variables>
+					</ee:transform>
+							<batch:aggregator doc:name="Batch Aggregator" doc:id="87ac4316-68ae-4bc3-90f4-ce02c366bf49" size="100">
+								<ee:transform doc:name="Transform Message" doc:id="5bfd63ae-0e69-431c-acc7-ce74750cfa91">
+									<ee:message>
+										<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload map read( $, 'application/json')]]></ee:set-payload>
+									</ee:message>
+								</ee:transform>
+								<salesforce:update doc:name="Update" doc:id="e91909c7-a16a-4e6c-babe-1d930df5a07d" config-ref="Salesforce_Config" type="PricebookEntry">
+					</salesforce:update>
+										<logger level="INFO" doc:name="Logger" doc:id="c1f24146-e138-486c-8c8d-550d08e18bc4" message="DRAW UPDATE COMPLETE"/>
+							</batch:aggregator>
+						</batch:step>
+					</batch:process-records>
+							<batch:on-complete >
+								<logger level="INFO" doc:name="Logger" doc:id="4fb8b7ba-831f-48ef-ae0e-38182a77696c" message='#[%dw 2.0&#10;output application/json&#10;---&#10;{"operationName" : "BASE BATCH RESPONSE : \n"} ++ payload]'/>
+							</batch:on-complete>
+				</batch:job>
+					</route>
+					<route >
+						<batch:job jobName="batch-update-industry-part-price" doc:id="a382c89b-7692-43aa-b66c-39ff49708e25" >
+							<batch:process-records >
+								<batch:step name="batch-step-for-srtx" doc:id="9db5bb9d-f3a7-433d-88f8-9b4b64add29a" acceptExpression='#[payload.srtxExternalID != null  and payload.srtxExternalID !="" and payload.srtxExternalID != []  ]'>
+							<ee:transform doc:name="Transform Message" doc:id="da349019-5f75-46d2-b95c-353d5cd58c93">
+								<ee:message>
+									<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+								</ee:message>
+							</ee:transform>
+							<ee:transform doc:name="industry-part-query" doc:id="a7596e22-104e-496c-ab16-240cef20d436">
+								<ee:message />
+								<ee:variables>
+											<ee:set-variable resource="dwl/var-srtx-compositeQuery1415.dwl" variableName="compositeQuery1415" />
+											<ee:set-variable resource="dwl/var-strx-compositeQuery34.dwl" variableName="compositeQuery34" />
+								</ee:variables>
+							</ee:transform>
+							<scatter-gather doc:name="Scatter-Gather" doc:id="aafcaa8b-0ad4-4664-8930-c36f95e0baf6">
+								<route>
+									<salesforce-composite:execute-composite-request doc:name="pricebookentry-id-3-" doc:id="5e21093c-2350-4cf0-898e-443865c966f0" config-ref="Salesforce_Composite_Config" target="compositeResponsePB34">
+								<salesforce-composite:request-body><![CDATA[#[vars.compositeQuery34]]]></salesforce-composite:request-body>
+							</salesforce-composite:execute-composite-request>
+								</route>
+								<route>
+									<salesforce-composite:execute-composite-request doc:name="pricebookentry-id-14-1" doc:id="488fe088-7882-43af-b2ec-96a3ce3d2ec1" config-ref="Salesforce_Composite_Config" target="compositeResponsePB1415">
+								<salesforce-composite:request-body><![CDATA[#[vars.compositeQuery1415]]]></salesforce-composite:request-body>
+							</salesforce-composite:execute-composite-request>
+								</route>
+							</scatter-gather>
+							<ee:transform doc:name="Transform Message1" doc:id="8c1a6061-2609-4c8d-875f-e372f47f3440">
+								<ee:message>
+											<ee:set-payload resource="dwl/combined-srtx-compositeResponse.dwl" />
+								</ee:message>
+								<ee:variables />
+							</ee:transform>
+							<batch:aggregator doc:name="Batch Aggregator" doc:id="4f956870-49c1-4430-bc5e-59a96ee047c1" size="100">
+								<ee:transform doc:name="Transform Message" doc:id="117094ba-61cd-4074-89bc-24ae0988485a">
+									<ee:message>
+										<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload map read( $, 'application/json')]]></ee:set-payload>
+									</ee:message>
+								</ee:transform>
+								<salesforce:update type="PricebookEntry" doc:name="Update" doc:id="8863b7ad-185f-4a03-9c34-d46828b65776" config-ref="Salesforce_Config" />
+										<logger level="INFO" doc:name="Logger" doc:id="3ef26237-5c72-41e7-8768-a8e59fd94817" message="INDUSTRY UPDATE COMPLETE"/>
+							</batch:aggregator>
+						</batch:step>
+							</batch:process-records>
+							<batch:on-complete >
+								<logger level="INFO" doc:name="Logger" doc:id="6af665ab-275d-4b95-ba76-8ba6332dcf38" message='#[%dw 2.0&#10;output application/json&#10;---&#10;{"operationName" : "INDUSTRY BATCH RESPONSE : \n"} ++ payload]'/>
+							</batch:on-complete>
+						</batch:job>
+					</route>
+				</scatter-gather>
+			</when>
+			<otherwise >
+				<logger level="INFO" doc:name="Logger" doc:id="8a912f96-a121-4a3c-b4be-3b17e2cc5f64" message="NO RECORDS TO PROCESS IN THIS RUN"/>
+			</otherwise>
+		</choice>
+	</sub-flow>
+	
+</mule>

@@ -1,0 +1,13 @@
+{
+  "main": "ntn-pricebooks-sf-sapi.raml",
+  "name": "ntn-pricebooks-sf-sapi",
+  "groupId": "e78cb80e-5627-43bc-8962-f4d269c5ef87",
+  "assetId": "ntn-pricebooks-sf-sapi",
+  "version": "1.0.2",
+  "classifier": "raml",
+  "tags": [],
+  "descriptorVersion": "1.0.0",
+  "organizationId": "e78cb80e-5627-43bc-8962-f4d269c5ef87",
+  "apiVersion": "v1",
+  "originalFormatVersion": "1.0"
+}
