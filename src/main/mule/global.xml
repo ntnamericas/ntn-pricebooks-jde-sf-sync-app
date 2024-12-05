@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:salesforce-composite="http://www.mulesoft.org/schema/mule/salesforce-composite"
+<mule xmlns:email="http://www.mulesoft.org/schema/mule/email"
+	xmlns:salesforce-composite="http://www.mulesoft.org/schema/mule/salesforce-composite"
 	xmlns:db="http://www.mulesoft.org/schema/mule/db"
 	xmlns:os="http://www.mulesoft.org/schema/mule/os"
 	xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties"
@@ -10,6 +11,7 @@
 	xmlns="http://www.mulesoft.org/schema/mule/core"
 	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd 
 http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd 
 http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
@@ -79,4 +81,15 @@ http://www.mulesoft.org/schema/mule/salesforce-composite http://www.mulesoft.org
 	<salesforce-composite:composite-config name="Salesforce_Composite_Config" doc:name="Salesforce Composite Config" doc:id="591336b2-19dd-4712-932c-f78bb2359df1" >
 		<salesforce-composite:oauth-user-pass-connection consumerKey="${secure::sf.consumerKey}" consumerSecret="${secure::sf.consumerSecret}" username="${sf.username}" password="${secure::sf.password}" securityToken="${secure::sf.securityToken}" tokenEndpoint="${sf.tokenEndpoint}" />
 	</salesforce-composite:composite-config>
+	<email:smtp-config name="NTN-SMTP"
+		doc:name="Email SMTP" doc:id="29450aaa-9843-4a1f-ab0a-e334a9564319">
+		<email:smtp-connection host="${smtp.host}"
+			port="${smtp.port}" user="${secure::smtp.user}"
+			password="${secure::smtp.password}">
+			<email:properties>
+				<email:property key="mail.smtp.starttls.enable"
+					value="true" />
+			</email:properties>
+		</email:smtp-connection>
+	</email:smtp-config>
 </mule>

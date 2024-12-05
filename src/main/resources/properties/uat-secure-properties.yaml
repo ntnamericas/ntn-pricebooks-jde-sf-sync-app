@@ -9,4 +9,7 @@ sf:
   password: "![hRt1ri9KnH5UalfO4hI4Vg==]"
   consumerKey: "![rshIWGzKseOKUYBiQHtmPcyzpYmUpUyM5o0iFZvD4r3CvFBEyhyYSXHqECEw4lVZXUa0/sO5BVXSNvizjHSlFZUyLfT8F7bzd/xgJAkJDOUqPTvnmOf5bA==]"
   consumerSecret: "![70hRHukuZVGciNOGiXBzyZkJjzMtd9e1qaffpa6U3TFAM2Ptrdyd+746sD+d6b13bchlFHX/L/u75l7Pc9r5h75NBEBnq+BS]"
-  
+ 
+smtp:
+  user: "![hRt1ri9KnH7VngaJcayGZ0D8arLBERHy1f3i+Ca4XPI=]"
+  password: "![Yk3HBzCPPp5RL3nOfWNzirX1mi98hVMs]" 

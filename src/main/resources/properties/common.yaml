@@ -26,15 +26,21 @@ log.category: "TRACKING"
 query:
   timeout: "10"
   timeoutUnit: "MINUTES" 
-  maxRows: "30000"  
+  maxRows: "30000"
+
+db:
+  reconnection-frequency : "50000"
+  reconnection-attempts : "5"
   
 scheduler:
   frequency: "30"
   startDelay: "0"
 
 salesforce:
-  object: "Account"
+  object: "PricebookEntry"
   externalId: "JDE_AddressNumber__c"
+  reconnection-frequency : "50000"
+  reconnection-attempts : "5"
   
 http:
   host: "0.0.0.0"
@@ -42,4 +48,9 @@ http:
   timeout: "30000"
   url: "/pricebooks"
   basePath: "/api/*"
+  reconnectionFrequency: "3000"
+  reconnectionAttempts: "5"
+  retryCount: "5"
+  retryFrequency: "3000"
+  ResponseTimeout: "90000000"
     
