@@ -6,7 +6,7 @@ BPLITM_F4106 AS (
  ---Get LITM from 4106 where BPMCU=1801
     Select TRIM(X1.BPLITM) AS BPLITM, TRIM(X1.BPMCU) AS BPMCU, TRIM(X1.BPUPMJ) AS BPUPMJ, TRIM(X1.BPTDAY) AS BPTDAY, TRIM(X1.BPUPRC) AS BPUPRC, TRIM(X1.BPCRCD) AS BPCRCD, TRIM(X1.BPEFTJ) AS BPEFTJ, TRIM(X1.BPEXDJ) AS BPEXDJ
     FROM TESTDTA.F4106 X1
-    WHERE  TRIM(X1.BPMCU)='1801' and ((X1.BPEFTJ <= $(vars.previousPbJobRun.date) AND X1.BPEXDJ >= $(vars.previousPbJobRun.date) and X1.BPUPMJ = $(vars.pbJobRun.date) AND X1.BPTDAY > $(vars.previousPbJobRun.date)) or X1.BPEFTJ = $(vars.previousPbJobRun.date))
+    WHERE  TRIM(X1.BPMCU)='1801' AND  ((X1.BPEFTJ >= $(vars.previousPbJobRun.date) AND X1.BPEXDJ >= $(vars.previousPbJobRun.date) and X1.BPUPMJ >= $(vars.pbJobRun.date) AND X1.BPTDAY >= $(vars.previousPbJobRun.date)) OR X1.BPEFTJ >= $(vars.previousPbJobRun.date))
 ),
  
 IBPRP1_IBSRP4_BPLITM AS (
@@ -56,7 +56,6 @@ INNER JOIN BPLITM_F4106 T4 ON
 INNER JOIN IBPRP1_IBSRP4_BPLITM T5 ON
     TRIM(T5.IBLITM)=TRIM(T1.IBLITM)
     and TRIM(T5.IBMCU)=trim(T4.BPMCU)
-WHERE TRIM(T1.IBMCU)='1801' AND  ((T4.BPEFTJ <= $(vars.previousPbJobRun.date) AND T4.BPEXDJ >= $(vars.previousPbJobRun.date) and T4.BPUPMJ = $(vars.pbJobRun.date) AND T4.BPTDAY > $(vars.previousPbJobRun.date)) or T4.BPEFTJ = $(vars.previousPbJobRun.date))
-ORDER BY T4.BPEFTJ DESC
-
-"
+WHERE TRIM(T1.IBMCU)='1801' 
+AND  ((T4.BPEFTJ >= $(vars.previousPbJobRun.date) AND T4.BPEXDJ >= $(vars.previousPbJobRun.date) and T4.BPUPMJ >= $(vars.pbJobRun.date) AND T4.BPTDAY >= $(vars.previousPbJobRun.date)) OR T4.BPEFTJ >= $(vars.previousPbJobRun.date))
+ORDER BY T4.BPEFTJ DESC"

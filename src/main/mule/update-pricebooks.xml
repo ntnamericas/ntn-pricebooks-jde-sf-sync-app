@@ -120,7 +120,7 @@ readUrl("classpath://queryScript/sqlScript-pbUpdate-consolidated-$(p('mule.env')
 					doc:id="581bfd17-3606-4302-add9-384cc0190e70">
 					<route>
 						<batch:job jobName="batch-update-base-part-price"
-							doc:id="1a247ada-cb80-49a1-951a-6ef81fd4c004">
+							doc:id="1a247ada-cb80-49a1-951a-6ef81fd4c004" maxFailedRecords="-1">
 							<batch:process-records>
 								<batch:step name="batch-step-for-draw"
 									doc:id="2a870735-4fd5-4bf8-ae6d-0c3b1eca57db"
@@ -210,7 +210,7 @@ payload map read( $, 'application/json')]]></ee:set-payload>
 					</route>
 					<route>
 						<batch:job jobName="batch-update-industry-part-price"
-							doc:id="a382c89b-7692-43aa-b66c-39ff49708e25">
+							doc:id="a382c89b-7692-43aa-b66c-39ff49708e25" maxFailedRecords="-1">
 							<batch:process-records>
 								<batch:step name="batch-step-for-srtx"
 									doc:id="9db5bb9d-f3a7-433d-88f8-9b4b64add29a"

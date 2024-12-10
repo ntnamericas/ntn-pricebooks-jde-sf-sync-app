@@ -25,7 +25,7 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 			</http:error-response>
 		</http:listener>
 		<logger level="INFO" doc:name="Logger" doc:id="8d48c7b9-5792-4092-8ebb-183e51750353" message='#["Request Received for Creation of New PriceBook entry with correlation id : " ++ correlationId]'/>
-		<apikit:router config-ref="ntn-pricebooks-sf-sapi-config"/>
+		<apikit:router config-ref="ntn-pricebooks-jde-sf-sync-app"/>
 		<error-handler>
 			<on-error-propagate type="APIKIT:BAD_REQUEST">
 				<ee:transform doc:name="Transform Message">

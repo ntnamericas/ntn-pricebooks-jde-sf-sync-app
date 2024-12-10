@@ -49,8 +49,8 @@ http://www.mulesoft.org/schema/mule/salesforce-composite http://www.mulesoft.org
 			</reconnection>
 		</db:oracle-connection>
 	</db:config>
-	<apikit:config name="ntn-pricebooks-sf-sapi-config"
-		api="ntn-pricebooks-sf-sapi.raml"
+	<apikit:config name="ntn-pricebooks-jde-sf-sync-app"
+		api="ntn-pricebooks-jde-sf-sync-app.raml"
 		outboundHeadersMapName="outboundHeaders"
 		httpStatusVarName="httpStatus" />
 	<configuration-properties

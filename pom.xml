@@ -4,7 +4,7 @@
 
 	<groupId>com.mycompany</groupId>
 	<artifactId>ntn-pricebooks-jde-sf-sync-app</artifactId>
-	<version>1.0.1-SNAPSHOT</version>
+	<version>1.0.2-SNAPSHOT</version>
 	<packaging>mule-application</packaging>
 	<name>ntn-pricebooks-jde-sf-sync-app</name>
 	<properties>

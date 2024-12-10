@@ -1,0 +1,24 @@
+#%RAML 1.0
+title: ntn-pricebooks-sf-sapi
+version: v1
+# baseUri: https://{app-name}/api/{version}
+protocols: [HTTPS,HTTP]
+mediaType: application/json
+# securitySchemes:
+#   security: !include libraries/securitySchemes.raml
+# securedBy: [security] 
+
+types:
+  pricebooksRequest: !include priceBooks/Request.raml
+
+/pricebooks :
+  post:
+      body:
+        application/json:
+          type: pricebooksRequest
+          example: !include examples/pricebook-request.raml
+      responses:
+            201:
+                  body:
+                        application/json:
+                              example: "success"
