@@ -52,7 +52,11 @@ http://www.mulesoft.org/schema/mule/salesforce-composite http://www.mulesoft.org
 	<apikit:config name="ntn-pricebooks-jde-sf-sync-app"
 		api="ntn-pricebooks-jde-sf-sync-app.raml"
 		outboundHeadersMapName="outboundHeaders"
-		httpStatusVarName="httpStatus" />
+		httpStatusVarName="httpStatus" >
+		<apikit:flow-mappings >
+			<apikit:flow-mapping resource="/pricebooks" action="post" content-type="application/json" flow-ref="post:\pricebooks:application\json:ntn-pricebooks-sf-sapi-config" />
+		</apikit:flow-mappings>
+	</apikit:config>
 	<configuration-properties
 		doc:name="Configuration properties"
 		doc:id="21402cc1-df9c-4937-a67e-bb647c24b04b"
