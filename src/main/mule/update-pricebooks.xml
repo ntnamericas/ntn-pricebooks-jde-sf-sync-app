@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:email="http://www.mulesoft.org/schema/mule/email"
+<mule xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking"
+	xmlns:email="http://www.mulesoft.org/schema/mule/email"
 	xmlns:batch="http://www.mulesoft.org/schema/mule/batch"
 	xmlns:aggregators="http://www.mulesoft.org/schema/mule/aggregators"
 	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
@@ -10,8 +11,7 @@
 	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
 	xmlns="http://www.mulesoft.org/schema/mule/core"
 	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
 http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd 
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
@@ -19,7 +19,8 @@ http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/cu
 http://www.mulesoft.org/schema/mule/salesforce-composite http://www.mulesoft.org/schema/mule/salesforce-composite/current/mule-salesforce-composite.xsd
 http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
 http://www.mulesoft.org/schema/mule/aggregators http://www.mulesoft.org/schema/mule/aggregators/current/mule-aggregators.xsd
-http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd">
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd">
 	<flow name="pricebook-schedule-flow"
 		doc:id="88f58918-100c-4130-b1c9-8e6860afceda">
 		<scheduler doc:name="Scheduler"
@@ -83,6 +84,7 @@ readUrl("classpath://queryScript/sqlScript-pbUpdate-consolidated-$(p('mule.env')
 			</error-handler>
 		</try>
 		<logger level="INFO" doc:name="Logger" doc:id="bb1ea9e8-0115-41f9-9c7e-0f091d2107c7" message='#[" \n \n Number of rows fetched from the Database : " ++ sizeOf(payload) ++ " \n "]'/>
+		<logger level="INFO" doc:name="Logger" doc:id="faee5bc7-6e8a-4d1e-9f98-a877d33b9b16" message='#[["\n Payload Fetched from the DB for Pricebok Update : \n"] ++ payload]'/>
 		<ee:transform doc:name="Transform Message"
 			doc:id="bf0e2fd3-112d-40a2-b7b6-c08489d58294">
 			<ee:message>
@@ -111,7 +113,7 @@ readUrl("classpath://queryScript/sqlScript-pbUpdate-consolidated-$(p('mule.env')
 	<sub-flow name="update-part-price"
 		doc:id="99a55df2-0d5c-4e31-a749-5a21d1385c05">
 		<choice doc:name="Choice"
-			doc:id="1de1e9e0-7157-4e41-9594-afddee75749a">
+			doc:id="1de1e9e0-7157-4e41-9594-afddee75749a" tracking:enable-default-events="true">
 			<when expression="#[payload !=[]]">
 				<logger level="INFO" doc:name="Logger"
 					doc:id="cbe2ffa0-86d7-4401-8b49-4eed28a21d17"
@@ -125,6 +127,7 @@ readUrl("classpath://queryScript/sqlScript-pbUpdate-consolidated-$(p('mule.env')
 								<batch:step name="batch-step-for-draw"
 									doc:id="2a870735-4fd5-4bf8-ae6d-0c3b1eca57db"
 									acceptExpression='#[payload.drawExternalID != null  and payload.drawExternalID !="" and payload.drawExternalID != []  ]'>
+									<logger level="INFO" doc:name="Logger" doc:id="189510e8-a75f-4b83-9108-49a8e710c46e" message='#["\n Executing Batch Step : batch-step-for-draw"]'/>
 									<ee:transform doc:name="Transform Message"
 										doc:id="b31b8145-971b-422d-b2cf-881a0beb5e52">
 										<ee:message>
@@ -142,23 +145,17 @@ payload]]></ee:set-payload>
 											<ee:set-variable
 												resource="dwl/var-base-compositeQuery34.dwl"
 												variableName="compositeQuery34" />
-											<ee:set-variable
+											<!-- <ee:set-variable
 												resource="dwl/var-base-compositeQuery1415.dwl"
-												variableName="compositeQuery1415" />
-										</ee:variables>
+												variableName="compositeQuery1415" />-->
+										</ee:variables> 
 									</ee:transform>
-									<scatter-gather doc:name="Scatter-Gather"
-										doc:id="ad0f5921-a43e-4084-8a1d-2f16c7a2c925">
-										<route>
-											<salesforce-composite:execute-composite-request
-												doc:name="pricebookentry-id-3-4"
-												doc:id="5e0e17cc-ce8c-4e95-953c-1fcf6253ea2c"
-												config-ref="Salesforce_Composite_Config"
-												target="compositeResponsePB34">
-												<reconnect frequency="${salesforce.reconnection-frequency}" count="${salesforce.reconnection-attempts}"/>
+									<salesforce-composite:execute-composite-request doc:name="pricebookentry-id-3-4" doc:id="5e0e17cc-ce8c-4e95-953c-1fcf6253ea2c" config-ref="Salesforce_Composite_Config" target="compositeResponsePB34">
+												<reconnect frequency="${salesforce.reconnection-frequency}" count="${salesforce.reconnection-attempts}" />
 												<salesforce-composite:request-body><![CDATA[#[vars.compositeQuery34]]]></salesforce-composite:request-body>
 											</salesforce-composite:execute-composite-request>
-										</route>
+									<!-- [STUDIO:"Commenting this as PB 14 and 15 Not in Scope Now. Use Later"]<scatter-gather doc:name="Commenting this as PB 14 and 15 Not in Scope Now. Use Later"
+										doc:id="ad0f5921-a43e-4084-8a1d-2f16c7a2c925">
 										<route>
 											<salesforce-composite:execute-composite-request
 												doc:name="pricebookentry-id-14-15"
@@ -166,10 +163,10 @@ payload]]></ee:set-payload>
 												config-ref="Salesforce_Composite_Config"
 												target="compositeResponsePB1415">
 												<reconnect frequency="${salesforce.reconnection-frequency}" count="${salesforce.reconnection-attempts}"/>
-												<salesforce-composite:request-body><![CDATA[#[vars.compositeQuery1415]]]></salesforce-composite:request-body>
+												<salesforce-composite:request-body><![CDATA[#[vars.compositeQuery1415&#93;&#93;&#93;></salesforce-composite:request-body>
 											</salesforce-composite:execute-composite-request>
 										</route>
-									</scatter-gather>
+									</scatter-gather> [STUDIO] -->
 									<ee:transform doc:name="Transform Message"
 										doc:id="61c60f0f-df2c-42ea-baaa-b0650a647614">
 										<ee:message>
@@ -197,7 +194,28 @@ payload map read( $, 'application/json')]]></ee:set-payload>
 										</salesforce:update>
 										<logger level="INFO" doc:name="Logger"
 											doc:id="c1f24146-e138-486c-8c8d-550d08e18bc4"
-											message="DRAW UPDATE COMPLETE" />
+											message='#[%dw 2.0&#10;output application/json&#10;---&#10;if (payload.items[0].exception.detailMessage == null){"Message":"Update of Base Parts Completed for the current Batch"} else payload.items map ((item, index) -&gt; &#10; {&#10;     Message : item.exception.message&#10; }&#10;&#10;)]' />
+									</batch:aggregator>
+								</batch:step>
+								<batch:step name="Batch_Step" doc:id="fc37fc3b-ac47-41e7-bf4b-53c03c6236eb" >
+									<ee:transform doc:name="Transform Message" doc:id="b3b3ff10-637e-43a6-b713-9b12413e9bb5" >
+										<ee:message >
+											<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{"errorMessage":vars.'_mule_batch_INTERNAL_record'.stepExceptions.Batch_Step.cause.errorMessage.payload.error.errors.message[0]} ++ payload]]></ee:set-payload>
+										</ee:message>
+									</ee:transform>
+									<batch:aggregator doc:name="Batch Aggregator" doc:id="03359c20-8a76-41d5-a6b4-d24579726a05" size="100">
+										<ee:transform doc:name="Transform Message" doc:id="063a2a7c-df6d-4297-84c2-c5a1508edd38" >
+											<ee:message >
+												<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map read( $, 'application/json')]]></ee:set-payload>
+											</ee:message>
+										</ee:transform>
+										<logger level="INFO" doc:name="Logger" doc:id="1b456de8-7534-4858-b37a-6bc7d25944c1" message='"FAILED RECORDS  ==&gt; \n " ++ #[payload]'/>
 									</batch:aggregator>
 								</batch:step>
 							</batch:process-records>
@@ -215,6 +233,7 @@ payload map read( $, 'application/json')]]></ee:set-payload>
 								<batch:step name="batch-step-for-srtx"
 									doc:id="9db5bb9d-f3a7-433d-88f8-9b4b64add29a"
 									acceptExpression='#[payload.srtxExternalID != null  and payload.srtxExternalID !="" and payload.srtxExternalID != []  ]'>
+									<logger level="INFO" doc:name="Logger" doc:id="f82b25c6-5bc5-497c-9ada-3591bcb8f011" message='#["\n Executing Batch Step : batch-step-for-srtx"]'/>
 									<ee:transform doc:name="Transform Message"
 										doc:id="da349019-5f75-46d2-b95c-353d5cd58c93">
 										<ee:message>
@@ -228,26 +247,20 @@ payload]]></ee:set-payload>
 										doc:id="a7596e22-104e-496c-ab16-240cef20d436">
 										<ee:message />
 										<ee:variables>
-											<ee:set-variable
+											<!-- <ee:set-variable
 												resource="dwl/var-srtx-compositeQuery1415.dwl"
-												variableName="compositeQuery1415" />
+												variableName="compositeQuery1415" /> -->
 											<ee:set-variable
 												resource="dwl/var-strx-compositeQuery34.dwl"
 												variableName="compositeQuery34" />
 										</ee:variables>
 									</ee:transform>
-									<scatter-gather doc:name="Scatter-Gather"
-										doc:id="aafcaa8b-0ad4-4664-8930-c36f95e0baf6">
-										<route>
-											<salesforce-composite:execute-composite-request
-												doc:name="pricebookentry-id-3-"
-												doc:id="5e21093c-2350-4cf0-898e-443865c966f0"
-												config-ref="Salesforce_Composite_Config"
-												target="compositeResponsePB34">
-												<reconnect frequency="${salesforce.reconnection-frequency}" count="${salesforce.reconnection-attempts}"/>
+									<salesforce-composite:execute-composite-request doc:name="pricebookentry-id-3-" doc:id="5e21093c-2350-4cf0-898e-443865c966f0" config-ref="Salesforce_Composite_Config" target="compositeResponsePB34">
+												<reconnect frequency="${salesforce.reconnection-frequency}" count="${salesforce.reconnection-attempts}" />
 												<salesforce-composite:request-body><![CDATA[#[vars.compositeQuery34]]]></salesforce-composite:request-body>
 											</salesforce-composite:execute-composite-request>
-										</route>
+									<!-- [STUDIO:"Commenting this as PB 14 and 15 Not in Scope Now. Use Later"]<scatter-gather doc:name="Commenting this as PB 14 and 15 Not in Scope Now. Use Later"
+										doc:id="aafcaa8b-0ad4-4664-8930-c36f95e0baf6">
 										<route>
 											<salesforce-composite:execute-composite-request
 												doc:name="pricebookentry-id-14-1"
@@ -255,10 +268,10 @@ payload]]></ee:set-payload>
 												config-ref="Salesforce_Composite_Config"
 												target="compositeResponsePB1415">
 												<reconnect frequency="${salesforce.reconnection-frequency}" count="${salesforce.reconnection-attempts}"/>
-												<salesforce-composite:request-body><![CDATA[#[vars.compositeQuery1415]]]></salesforce-composite:request-body>
+												<salesforce-composite:request-body><![CDATA[#[vars.compositeQuery1415&#93;&#93;&#93;></salesforce-composite:request-body>
 											</salesforce-composite:execute-composite-request>
 										</route>
-									</scatter-gather>
+									</scatter-gather> [STUDIO] -->
 									<ee:transform doc:name="Transform Message1"
 										doc:id="8c1a6061-2609-4c8d-875f-e372f47f3440">
 										<ee:message>
@@ -286,7 +299,28 @@ payload map read( $, 'application/json')]]></ee:set-payload>
 										</salesforce:update>
 										<logger level="INFO" doc:name="Logger"
 											doc:id="3ef26237-5c72-41e7-8768-a8e59fd94817"
-											message="INDUSTRY UPDATE COMPLETE" />
+											message='#[%dw 2.0&#10;output application/json&#10;---&#10;if (payload.items[0].exception.detailMessage == null){"Message":"Update of Industry Parts Completed for the current Batch"} else payload.items map ((item, index) -&gt; &#10; {&#10;     Message : item.exception.message&#10; }&#10;&#10;)]' />
+									</batch:aggregator>
+								</batch:step>
+								<batch:step name="Batch_Step" doc:id="43d3378f-07ec-4dbd-9662-e0cbfdc485d7" acceptPolicy="ONLY_FAILURES">
+									<ee:transform doc:name="Transform Message" doc:id="f29ca756-1419-421a-b4d5-ff092be220c9" >
+										<ee:message >
+											<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+										</ee:message>
+									</ee:transform>
+									<batch:aggregator doc:name="Batch Aggregator" doc:id="e51e1643-a4d2-4301-992f-050b789b09f4" size="100">
+										<ee:transform doc:name="Transform Message" doc:id="b0089130-3e00-4c67-8cb3-c9f4d8d121ff" >
+											<ee:message >
+												<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map read( $, 'application/json')]]></ee:set-payload>
+											</ee:message>
+										</ee:transform>
+										<logger level="INFO" doc:name="Logger" doc:id="188f052e-a8aa-4690-b10b-884379dceaad" message='"FAILED RECORDS  ==&gt; \n " ++ #[payload]'/>
 									</batch:aggregator>
 								</batch:step>
 							</batch:process-records>
@@ -355,6 +389,6 @@ skipNullOn="everywhere"
 }]]]></email:content>
 			</email:body>
 		</email:send>
-		<logger level="INFO" doc:name="Logger" doc:id="43f13211-3b2c-4837-b90c-7f0394b5dc73" message='#["Error email sent"]'/>
+		<logger level="INFO" doc:name="Logger" doc:id="43f13211-3b2c-4837-b90c-7f0394b5dc73" message='#["\n Unexpected Error Occurred in the Process. Error email sent"]'/>
 		</sub-flow>
 </mule>

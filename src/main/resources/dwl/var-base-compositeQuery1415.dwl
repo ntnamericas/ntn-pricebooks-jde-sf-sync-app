@@ -22,7 +22,7 @@ output application/json
 	  {
         "method": "GET",
         "referenceId": "refPBE14" ++ index as String,
-        "url": "/services/data/v57.0/query/?q=SELECT id from PricebookEntry where (Pricebook2Id = '@{refPricebook14" ++ index as String ++ ".records[0].Id}' and Product2Id = '@{refProduct2" ++ index as String ++ ".records[0].Id}')"
+        "url": "/services/data/v57.0/query/?q=SELECT id, CurrencyIsoCode from PricebookEntry where (Pricebook2Id = '@{refPricebook14" ++ index as String ++ ".records[0].Id}' and Product2Id = '@{refProduct2" ++ index as String ++ ".records[0].Id}')"
       },
       {
         "method": "GET",

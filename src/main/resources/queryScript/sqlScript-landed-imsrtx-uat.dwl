@@ -8,7 +8,7 @@ DRDL01_IBPRP4 AS (
     SELECT Y1.DRDL01 AS DRDLO1, Y1.DRKY
     FROM CRPCTL.F0005 Y1
     WHERE TRIM(Y1.DRSY) = '41' AND TRIM(Y1.DRRT) = 'P4' 
-    AND (TRIM(Y1.DRUPMJ) >= $(vars.productsJobRun.date) AND TRIM(Y1.DRUPMT) >= $(vars.previousProductsJobRun.time))
+    --AND (TRIM(Y1.DRUPMJ) >= $(vars.productsJobRun.date) AND TRIM(Y1.DRUPMT) >= $(vars.previousProductsJobRun.time))
 ),
 
 

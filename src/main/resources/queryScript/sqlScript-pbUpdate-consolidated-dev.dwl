@@ -52,9 +52,11 @@ INNER JOIN IMDRAW_IMSRTX_BPLITM T3 ON
      TRIM(T3.IMLITM)=TRIM(T2.IMLITM)
 INNER JOIN BPLITM_F4106 T4 ON
     TRIM(T4.BPLITM)=TRIM(T1.IBLITM)
-    and TRIM(T1.IBMCU)=trim(T4.BPMCU)
+    AND TRIM(T1.IBMCU)=trim(T4.BPMCU)
 INNER JOIN IBPRP1_IBSRP4_BPLITM T5 ON
     TRIM(T5.IBLITM)=TRIM(T1.IBLITM)
-    and TRIM(T5.IBMCU)=trim(T4.BPMCU)
-WHERE TRIM(T1.IBMCU)='1801' AND  ((T4.BPEFTJ >= $(vars.previousPbJobRun.date) AND T4.BPEXDJ >= $(vars.previousPbJobRun.date) and T4.BPUPMJ = $(vars.pbJobRun.date) AND T4.BPTDAY >= $(vars.previousPbJobRun.time)) or T4.BPEFTJ >= $(vars.previousPbJobRun.date))
+    AND TRIM(T5.IBMCU)=trim(T4.BPMCU)
+WHERE TRIM(T1.IBMCU)='1801' AND  ((T4.BPEFTJ >= $(vars.previousPbJobRun.date) 
+    AND T4.BPEXDJ >= $(vars.previousPbJobRun.date) and T4.BPUPMJ = $(vars.pbJobRun.date) 
+    AND T4.BPTDAY >= $(vars.previousPbJobRun.time)) or T4.BPEFTJ >= $(vars.previousPbJobRun.date))
 ORDER BY T4.BPEFTJ DESC"
