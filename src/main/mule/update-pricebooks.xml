@@ -194,7 +194,7 @@ payload map read( $, 'application/json')]]></ee:set-payload>
 										</salesforce:update>
 										<logger level="INFO" doc:name="Logger"
 											doc:id="c1f24146-e138-486c-8c8d-550d08e18bc4"
-											message='#[%dw 2.0&#10;output application/json&#10;---&#10;if (payload.items[0].exception.detailMessage == null){"Message":"Update of Base Parts Completed for the current Batch"} else payload.items map ((item, index) -&gt; &#10; {&#10;     Message : item.exception.message&#10; }&#10;&#10;)]' />
+											message='#[%dw 2.0&#10;output application/json&#10;---&#10;if (payload.successful == true) {Successful : payload.successful}&#10;else (payload.items map() -&gt; {&#10;	failedId: $.id,&#10;	message: $.message&#10;	&#10;})]' />
 									</batch:aggregator>
 								</batch:step>
 								<batch:step name="Batch_Step" doc:id="fc37fc3b-ac47-41e7-bf4b-53c03c6236eb" >
@@ -299,7 +299,7 @@ payload map read( $, 'application/json')]]></ee:set-payload>
 										</salesforce:update>
 										<logger level="INFO" doc:name="Logger"
 											doc:id="3ef26237-5c72-41e7-8768-a8e59fd94817"
-											message='#[%dw 2.0&#10;output application/json&#10;---&#10;if (payload.items[0].exception.detailMessage == null){"Message":"Update of Industry Parts Completed for the current Batch"} else payload.items map ((item, index) -&gt; &#10; {&#10;     Message : item.exception.message&#10; }&#10;&#10;)]' />
+											message='#[%dw 2.0&#10;output application/json&#10;---&#10;if (payload.successful == true) {Successful : payload.successful}&#10;else (payload.items map() -&gt; {&#10;	failedId: $.id,&#10;	message: $.message&#10;	&#10;})]' />
 									</batch:aggregator>
 								</batch:step>
 								<batch:step name="Batch_Step" doc:id="43d3378f-07ec-4dbd-9662-e0cbfdc485d7" acceptPolicy="ONLY_FAILURES">
