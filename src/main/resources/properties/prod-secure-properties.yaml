@@ -1,0 +1,15 @@
+#DB config details
+db:
+  password: "![qShUQca+XRPO80VgwER8uQ==]"
+  user: "![7QqCW9QjsxUigvR2UPZDgw==]"
+  
+
+sf:
+  securityToken: "![pxS/bMSXsKXRM/Ph2PWwFqE1Lk9fXlTzNNGx3zwfAz8=]"
+  password: "![2YNZt1lm+MRm7qkhAuEumw==]"
+  consumerKey: "![EcXBTeWMMaVCEEi9WUaGSqE09nvQOCXB8A0KkGVWkyZOBaY1+m0B7te3JSWrKUPCfd9wxS9PIB5P3AFn9zrs5pg815nBHF0V3G8dltx78IhdjTzU31pnEA==]"
+  consumerSecret: "![/R6rU6BCBm6HSsMJWPKTSd97S0VwGuQdqnnCRpYHdgJfJ7hb/Va5860uD6lVzmQ/95UtFnynjLulyE8DlNQGAyDIjV/aQhK2]"
+ 
+smtp:
+  user: "![hRt1ri9KnH7VngaJcayGZ0D8arLBERHy1f3i+Ca4XPI=]"
+  password: "![Yk3HBzCPPp5RL3nOfWNzirX1mi98hVMs]" 

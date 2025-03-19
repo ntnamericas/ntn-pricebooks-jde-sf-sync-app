@@ -1,0 +1,19 @@
+api.id: ""
+app:
+  name: "ntn-pricebooks-jde-sf-sync-app"  
+  env: "LOCAL"
+  
+sf:
+  authURL: "https://ntnconnect--muledev.sandbox.my.salesforce.com/services/Soap/u/58.0"
+  username: "ntnmule@prowesssoft.com.muledev"
+  tokenEndpoint: "https://ntnconnect--muledev.sandbox.my.salesforce.com/services/oauth2/token"
+  
+db:
+  host: "129.147.16.140"
+  port: "1521"
+  svc: "jdorcldv.netjiuwoz.vcnzgqox.oraclevcn.com"
+
+smtp:
+  host: "smtp.office365.com"
+  port: "25"  
+  to: "ntnmule@prowesssoft.com"

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule
+	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:batch="http://www.mulesoft.org/schema/mule/batch"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd">
+	<sub-flow name="create-pricebook-apiFlow"
+		doc:id="5686b2e0-06ee-44be-ad8e-6ce519522879">
+		<ee:transform doc:name="Transform Message"
+			doc:id="1bb2e78b-e9c9-4226-be06-51d59551b707">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="e83e8137-5451-4e03-bfd9-6f9c1f86a92f" message='#["\n Payload before creating pricebook creation requests"]'/>
+		<parallel-foreach doc:name="Parallel For Each"
+			doc:id="10e38c8a-ba98-4b68-bf84-573f08ba8b4b" collection="#[payload]">
+			<ee:transform doc:name="Transform Message"
+				doc:id="255e11a3-9fb4-4ffd-9eaf-5e0771324a78">
+				<ee:message>
+				</ee:message>
+				<ee:variables>
+					<ee:set-variable resource="dwl/var-b.dwl"
+						variableName="b" />
+					<ee:set-variable resource="dwl/var-a.dwl"
+						variableName="a" />
+				</ee:variables>
+			</ee:transform>
+			<salesforce:create doc:name="Create Standard PriceBook"
+				doc:id="3e7bce53-d432-41ed-b94e-eabc5c2140c2" type="${salesforce.object}"
+				config-ref="Salesforce_Config">
+				<salesforce:records><![CDATA[#[vars.a]]]></salesforce:records>
+			</salesforce:create>
+			<logger level="INFO" doc:name="Logger"
+				doc:id="a034ac2c-6349-4c43-a34b-71800202fa57"
+				message="#[%dw 2.0&#10;output application/json&#10;---&#10;if (payload.successful == true) {Successful : payload.successful}&#10;else (payload.items map() -&gt; {&#10;	failedId: $.id,&#10;	message: $.message&#10;	&#10;})]" />
+			<logger level="INFO" doc:name="Logger" doc:id="e5b13ef8-ba7a-452c-8d9f-a826991ac121" message='#["\n Standard PriceBook Creation Call Completed"]'/>
+			<ee:transform doc:name="Transform Message"
+				doc:id="fe65ebc9-05d0-4241-8859-6f297cf0af75">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+vars.b filter ((item) -> !(vars.a contains item))]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<salesforce:create doc:name="Create Other PriceBooks"
+				doc:id="5af4ab70-8c09-443d-907d-de41efd99558" type="${salesforce.object}"
+				config-ref="Salesforce_Config" />
+			<ee:transform doc:name="Transform Message"
+				doc:id="8da69ee7-19d6-4ff8-af09-730478ca89a8">
+				<ee:message>
+					<ee:set-payload><![CDATA[output application/json
+---
+payload.items map($.id)]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<logger level="INFO" doc:name="Logger"
+				doc:id="48909c2f-c632-4b79-9993-e9e5cba09535" message="#[%dw 2.0&#10;output application/json&#10;---&#10;if (payload.successful == true) {Successful : payload.successful}&#10;else (payload.items map() -&gt; {&#10;	failedId: $.id,&#10;	message: $.message&#10;	&#10;})]" />
+			<logger level="INFO" doc:name="Logger" doc:id="99966692-7240-435c-9c9e-328cb6563adc" message='#["\n completing flow create-pricebooks after creating other Pricebooks at : " ++ now()]'/>
+		</parallel-foreach>
+
+	</sub-flow>
+</mule>
