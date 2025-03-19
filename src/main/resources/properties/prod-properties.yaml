@@ -22,4 +22,4 @@ http:
 smtp:
   host: "smtp.office365.com"
   port: "25"  
-  to: "ntnmule@prowesssoft.com"
+  to: "ntnmule@prowesssoft.com,noreply@ntnusa.com"
