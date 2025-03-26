@@ -40,7 +40,7 @@ payload]]></ee:set-payload>
 			</ee:transform>
 			<salesforce:create doc:name="Create Standard PriceBook"
 				doc:id="3e7bce53-d432-41ed-b94e-eabc5c2140c2" type="${salesforce.object}"
-				config-ref="Salesforce_Config">
+				config-ref="Salesforce_Config" readTimeout="${read.timeout}" readTimeoutUnit="MILLISECONDS">
 				<salesforce:records><![CDATA[#[vars.a]]]></salesforce:records>
 			</salesforce:create>
 			<logger level="INFO" doc:name="Logger"
@@ -58,7 +58,7 @@ vars.b filter ((item) -> !(vars.a contains item))]]></ee:set-payload>
 			</ee:transform>
 			<salesforce:create doc:name="Create Other PriceBooks"
 				doc:id="5af4ab70-8c09-443d-907d-de41efd99558" type="${salesforce.object}"
-				config-ref="Salesforce_Config" />
+				config-ref="Salesforce_Config" readTimeout="${read.timeout}" readTimeoutUnit="MILLISECONDS"/>
 			<ee:transform doc:name="Transform Message"
 				doc:id="8da69ee7-19d6-4ff8-af09-730478ca89a8">
 				<ee:message>
