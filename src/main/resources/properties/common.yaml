@@ -14,9 +14,6 @@ untilSuccess:
   retries: "2"
   timeInterval: "3000"    
 
-
-
-read.timeout: "30000"
 #Logger category
 log.level: "INFO"
 log.category: "TRACKING"

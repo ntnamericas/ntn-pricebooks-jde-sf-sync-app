@@ -4,7 +4,7 @@
 
 	<groupId>com.mycompany</groupId>
 	<artifactId>ntn-pricebooks-jde-sf-sync-app</artifactId>
-	<version>1.0.0-rc1</version>
+	<version>1.0.0-rc3</version>
 	<packaging>mule-application</packaging>
 	<name>ntn-pricebooks-jde-sf-sync-app</name>
 	<properties>
@@ -74,18 +74,6 @@
 			<groupId>com.mulesoft.connectors</groupId>
 			<artifactId>mule-salesforce-connector</artifactId>
 			<version>10.22.9</version>
-			<classifier>mule-plugin</classifier>
-		</dependency>
-		<dependency>
-			<groupId>org.mule.connectors</groupId>
-			<artifactId>mule-sockets-connector</artifactId>
-			<version>1.2.5</version>
-			<classifier>mule-plugin</classifier>
-		</dependency>
-		<dependency>
-			<groupId>org.mule.connectors</groupId>
-			<artifactId>mule-file-connector</artifactId>
-			<version>1.5.3</version>
 			<classifier>mule-plugin</classifier>
 		</dependency>
 		<dependency>
