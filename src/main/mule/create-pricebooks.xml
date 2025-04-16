@@ -30,7 +30,7 @@ payload]]></ee:set-payload>
 output application/json
 
 ---
-payload filter (item) -> item != null and item.Product2Id != "" and item.PriceBookId.id != []]]></ee:set-payload>
+payload filter (item) -> item != null and item.Product2Id != "" and item.Product2Id != null and item.PriceBookId.id != []]]></ee:set-payload>
 			</ee:message>
 			<ee:variables >
 				<ee:set-variable variableName="invalidPayload" ><![CDATA[%dw 2.0
@@ -44,7 +44,7 @@ output application/java
 []]]></ee:set-variable>
 			</ee:variables>
 		</ee:transform>
-		<logger level="INFO" doc:name="Logger" doc:id="e83e8137-5451-4e03-bfd9-6f9c1f86a92f" message='#["\n Payload before creating pricebook creation requests"]'/>
+		<logger level="INFO" doc:name="Logger" doc:id="e83e8137-5451-4e03-bfd9-6f9c1f86a92f" message='#[["\n Payload before creating pricebook creation requests : \n"] ++ payload]'/>
 		<parallel-foreach doc:name="Parallel For Each"
 			doc:id="10e38c8a-ba98-4b68-bf84-573f08ba8b4b" collection="#[payload]">
 			<ee:transform doc:name="Transform Message"

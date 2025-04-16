@@ -40,13 +40,24 @@ http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/m
 		</ee:transform>
 		<logger level="INFO" doc:name="jobRun logger"
 			doc:id="cfb2f379-e447-48dd-8c0a-d7ab1ef52e6b"
-			category= "${log.category}" message='#[vars.pbJobRun]'/>
+			category= "${log.category}" message='#[%dw 2.0&#10;output application/java&#10;---&#10;"&#10;CurrentJobRunDetails : " ++ vars.pbJobRun.^raw]'/>
 		<os:retrieve doc:name="retrievePreviousJobRun"
 			doc:id="8cfe8ccc-7187-4af6-ad58-5273aea49dcb" key="previousPbJobRun"
 			target="previousPbJobRun"
 			objectStore="Object_store_Previous_pb_Job_Run">
 			<os:default-value><![CDATA[#[vars.pbJobRun]]]></os:default-value>
 		</os:retrieve>
+		<!-- [STUDIO:"Transform Message"]<ee:transform doc:name="Transform Message" doc:id="944ef628-5c1f-4b1e-829c-28499d017ca6" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="previousPbJobRun" ><![CDATA[{
+  "date": "125104",
+  "time": "122638"
+}&#93;&#93;></ee:set-variable>
+			</ee:variables>
+		</ee:transform> [STUDIO] -->
+		<logger level="INFO" doc:name="Logger" doc:id="4920f3ea-aa02-4252-8cf9-dbaadbf0ff7f" message='#[%dw 2.0&#10;output application/java&#10;---&#10;"&#10;LastjobRunDetails : " ++ vars.previousPbJobRun.^raw]' />
 		<logger level="INFO" doc:name="Logger"
 			doc:id="df399b36-638d-4865-811e-283e4e6ca4a8"
 			message='#["Calling \"update-pricebooks-subflow\" "]' category="${log.category}" />
@@ -181,12 +192,19 @@ payload]]></ee:set-payload>
 										<ee:transform doc:name="Transform Message"
 											doc:id="5bfd63ae-0e69-431c-acc7-ce74750cfa91">
 											<ee:message>
-												<ee:set-payload><![CDATA[%dw 2.0
+												<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
 ---
-payload map read( $, 'application/json')]]></ee:set-payload>
+flatten(payload map read( $, 'application/json')) filter $.Id != null]]></ee:set-payload>
 											</ee:message>
+											<ee:variables >
+												<ee:set-variable variableName="aggregatorVar" ><![CDATA[%dw 2.0
+output application/json
+---
+flatten(payload map read( $, 'application/json'))]]></ee:set-variable>
+											</ee:variables>
 										</ee:transform>
+										<logger level="INFO" doc:name="Logger" doc:id="ebe08fe7-3a1d-4510-a1fb-561f9e22a9ea" message="#[%dw 2.0&#10;output application/json&#10;---&#10;payload]"/>
 										<salesforce:update doc:name="Update"
 											doc:id="e91909c7-a16a-4e6c-babe-1d930df5a07d"
 											config-ref="Salesforce_Config" type="${salesforce.object}">
@@ -194,10 +212,18 @@ payload map read( $, 'application/json')]]></ee:set-payload>
 										</salesforce:update>
 										<logger level="INFO" doc:name="Logger"
 											doc:id="c1f24146-e138-486c-8c8d-550d08e18bc4"
-											message='#[%dw 2.0&#10;output application/json&#10;---&#10;if (payload.successful == true) {Successful : payload.successful}&#10;else (payload.items map() -&gt; {&#10;	failedId: $.id,&#10;	message: $.message&#10;	&#10;})]' />
+											message='#[%dw 2.0&#10;output application/json&#10;---&#10;if (payload.successful == true) {&#10;"partType Updated " : "Base Parts Pricebook Entry Updated",&#10;"Successful" : payload.successful,&#10;"Ids Updated": payload.items map ($.id )}&#10;else (payload.items map() -&gt; {&#10;	"partType Failed " : "Base Parts Pricebook Entry Failed",&#10;	failedId: $.id,&#10;	message: $.message&#10;	&#10;})]' />
+										<ee:transform doc:name="Transform Message" doc:id="afcbadd5-96a9-4c7a-9828-9fd0877eee75" >
+											<ee:message >
+												<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+vars.aggregatorVar]]></ee:set-payload>
+											</ee:message>
+										</ee:transform>
 									</batch:aggregator>
 								</batch:step>
-								<batch:step name="Batch_Step" doc:id="fc37fc3b-ac47-41e7-bf4b-53c03c6236eb" >
+								<batch:step name="Batch_Step" doc:id="fc37fc3b-ac47-41e7-bf4b-53c03c6236eb" acceptPolicy="ONLY_FAILURES">
 									<ee:transform doc:name="Transform Message" doc:id="b3b3ff10-637e-43a6-b713-9b12413e9bb5" >
 										<ee:message >
 											<ee:set-payload ><![CDATA[%dw 2.0
@@ -288,9 +314,16 @@ payload]]></ee:set-payload>
 												<ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
-payload map read( $, 'application/json')]]></ee:set-payload>
+flatten(payload map read( $, 'application/json')) filter $.Id != null]]></ee:set-payload>
 											</ee:message>
+											<ee:variables >
+												<ee:set-variable variableName="aggregatorVar" ><![CDATA[%dw 2.0
+output application/json
+---
+flatten(payload map read( $, 'application/json'))]]></ee:set-variable>
+											</ee:variables>
 										</ee:transform>
+										<logger level="INFO" doc:name="Logger" doc:id="cfc945d5-8c05-423b-8f58-f018bdf06d0c" message="#[%dw 2.0&#10;output application/json&#10;---&#10;payload]"/>
 										<salesforce:update type="${salesforce.object}"
 											doc:name="Update-PricebookEntry"
 											doc:id="8863b7ad-185f-4a03-9c34-d46828b65776"
@@ -299,7 +332,15 @@ payload map read( $, 'application/json')]]></ee:set-payload>
 										</salesforce:update>
 										<logger level="INFO" doc:name="Logger"
 											doc:id="3ef26237-5c72-41e7-8768-a8e59fd94817"
-											message='#[%dw 2.0&#10;output application/json&#10;---&#10;if (payload.successful == true) {Successful : payload.successful}&#10;else (payload.items map() -&gt; {&#10;	failedId: $.id,&#10;	message: $.message&#10;	&#10;})]' />
+											message='#[%dw 2.0&#10;output application/json&#10;---&#10;if (payload.successful == true) {&#10;"partType Updated " : "Industry Parts Pricebook Entry Updated",&#10;"Successful" : payload.successful,&#10;"Ids Updated": payload.items map ($.id )}&#10;else (payload.items map() -&gt; {&#10;	"partType Failed " : "Industry Parts Pricebook Entry Failed",&#10;	failedId: $.id,&#10;	message: $.message&#10;	&#10;})]' />
+										<ee:transform doc:name="Transform Message" doc:id="1b34746d-f8ae-4790-9393-b6e4dda985f1" >
+											<ee:message >
+												<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+vars.aggregatorVar]]></ee:set-payload>
+											</ee:message>
+										</ee:transform>
 									</batch:aggregator>
 								</batch:step>
 								<batch:step name="Batch_Step" doc:id="43d3378f-07ec-4dbd-9662-e0cbfdc485d7" acceptPolicy="ONLY_FAILURES">
@@ -369,7 +410,7 @@ skipNullOn="everywhere"
                             },
                           "tr":{
                                 "th": "Error Type",
-                                "td": if ( error.errorType.asString != null) error.errorType.asString else vars.error
+                                "td": if ( error.errorType != null) error.errorType.asString else vars.error
                             },
                           "tr":{
                                 "th": "Salesforce Id",

@@ -1,5 +1,15 @@
 %dw 2.0
+import * from dw::core::Strings
 output application/json
+fun urlEncode(str: String): String =
+  str replace " " with "%20"
+      replace "'" with "%27"
+      replace "#" with "%23"
+      replace "(" with "%28"
+      replace ")" with "%29"
+      replace "," with "%2C"
+      replace "=" with "%3D"
+      replace "@" with "%40"
 ---
 {
   "compositeRequest": flatten(
@@ -7,7 +17,8 @@ output application/json
       {
         "method": "GET",
         "referenceId": "refProduct2" ++ index as String,
-        "url": "/services/data/v57.0/query/?q=SELECT id from Product2 where External_ID__c = '" ++ item.srtxExternalID ++ "'"
+        "url": "/services/data/v57.0/query/?q=" ++ urlEncode("SELECT id from Product2 where External_ID__c = '" ++ item.srtxExternalID ++ "'")
+        //"url": "/services/data/v57.0/query/?q=SELECT id from Product2 where External_ID__c = '" ++ (item.srtxExternalID as String) ++ "'"
       },
       {
         "method": "GET",
