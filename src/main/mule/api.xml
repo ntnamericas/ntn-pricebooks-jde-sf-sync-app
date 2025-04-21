@@ -14,7 +14,7 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd">
 	<flow name="ntn-pricebooks-sf-sapi-main" tracking:enable-default-events="true">
 		<http:listener
-			path="${http.basePath}" config-ref="ntn-pricebooks-sf-sapi-httpListenerConfig">
+			path="${http.basePath}" config-ref="ntn-pricebooks-sf-sapi-httpListenerConfig" allowedMethods="POST" outputMimeType="application/json">
 			<http:response
 				statusCode="#[vars.httpStatus default 200]">
 				<http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>

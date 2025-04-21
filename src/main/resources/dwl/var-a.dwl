@@ -10,4 +10,4 @@ flatten(
             Pricebook2Id:  priceBookId,
             UnitPrice: item.UnitPrice
         }
-))
+))[0]
