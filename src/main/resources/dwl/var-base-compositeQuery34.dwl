@@ -17,7 +17,7 @@ fun urlEncode(str: String): String =
       {
         "method": "GET",
         "referenceId": "refProduct2" ++ index as String,
-        "url": "/services/data/v57.0/query/?q=" ++ urlEncode("SELECT id from Product2 where External_ID__c = '" ++ item.drawExternalID ++ "'")
+        "url": "/services/data/v57.0/query/?q=" ++ urlEncode("SELECT id from Product2 where External_ID__c = '" ++ item.drawExternalIDLanded ++ "'")
       },
       {
         "method": "GET",

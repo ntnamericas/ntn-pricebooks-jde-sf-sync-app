@@ -17,8 +17,8 @@ fun urlEncode(str: String): String =
       {
         "method": "GET",
         "referenceId": "refProduct2" ++ index as String,
-        "url": "/services/data/v57.0/query/?q=" ++ urlEncode("SELECT id from Product2 where External_ID__c = '" ++ item.srtxExternalID ++ "'")
-        //"url": "/services/data/v57.0/query/?q=SELECT id from Product2 where External_ID__c = '" ++ (item.srtxExternalID as String) ++ "'"
+        "url": "/services/data/v57.0/query/?q=" ++ urlEncode("SELECT id from Product2 where External_ID__c = '" ++ item.srtxExternalIDLanded ++ "'")
+        //"url": "/services/data/v57.0/query/?q=SELECT id from Product2 where External_ID__c = '" ++ (item.item.srtxExternalIDLanded as String) ++ "'"
       },
       {
         "method": "GET",

@@ -47,16 +47,16 @@ http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/m
 			objectStore="Object_store_Previous_pb_Job_Run">
 			<os:default-value><![CDATA[#[vars.pbJobRun]]]></os:default-value>
 		</os:retrieve>
-		<!-- [STUDIO:"Transform Message"]<ee:transform doc:name="Transform Message" doc:id="944ef628-5c1f-4b1e-829c-28499d017ca6" >
+		<ee:transform doc:name="Transform Message" doc:id="944ef628-5c1f-4b1e-829c-28499d017ca6" >
 			<ee:message >
 			</ee:message>
 			<ee:variables >
 				<ee:set-variable variableName="previousPbJobRun" ><![CDATA[{
-  "date": "125104",
-  "time": "122638"
-}&#93;&#93;></ee:set-variable>
+  "date": "125108",
+  "time": "104622"
+}]]></ee:set-variable>
 			</ee:variables>
-		</ee:transform> [STUDIO] -->
+		</ee:transform>
 		<logger level="INFO" doc:name="Logger" doc:id="4920f3ea-aa02-4252-8cf9-dbaadbf0ff7f" message='#[%dw 2.0&#10;output application/java&#10;---&#10;"&#10;LastjobRunDetails : " ++ vars.previousPbJobRun.^raw]' />
 		<logger level="INFO" doc:name="Logger"
 			doc:id="df399b36-638d-4865-811e-283e4e6ca4a8"
@@ -132,15 +132,21 @@ readUrl("classpath://queryScript/sqlScript-pbUpdate-consolidated-$(p('mule.env')
 				<scatter-gather doc:name="Scatter-Gather"
 					doc:id="581bfd17-3606-4302-add9-384cc0190e70">
 					<route>
-						<batch:job jobName="batch-update-base-part-price"
-							doc:id="1a247ada-cb80-49a1-951a-6ef81fd4c004" maxFailedRecords="-1">
+						<ee:transform doc:name="Transform Message" doc:id="3167ec15-642b-40c2-a0ec-0a8a67a2de1d" >
+							<ee:message >
+								<ee:set-payload ><![CDATA[%dw 2.0
+output application/json skipNullOn="everywhere"
+---
+payload map (item) ->
+  if (item.drawExternalIDLanded? ) item - "srtxExternalIDLanded" else null ]]></ee:set-payload>
+							</ee:message>
+						</ee:transform>
+						<logger level="INFO" doc:name="Logger" doc:id="30ab2af6-91dc-42d5-946a-0e1d826e3cfd" message="#[payload]"/>
+						<batch:job jobName="batch-update-base-part-price" doc:id="1a247ada-cb80-49a1-951a-6ef81fd4c004" maxFailedRecords="-1">
 							<batch:process-records>
-								<batch:step name="batch-step-for-draw"
-									doc:id="2a870735-4fd5-4bf8-ae6d-0c3b1eca57db"
-									acceptExpression='#[payload.drawExternalID != null  and payload.drawExternalID !="" and payload.drawExternalID != []  ]'>
-									<logger level="INFO" doc:name="Logger" doc:id="189510e8-a75f-4b83-9108-49a8e710c46e" message='#["\n Executing Batch Step : batch-step-for-draw"]'/>
-									<ee:transform doc:name="Transform Message"
-										doc:id="b31b8145-971b-422d-b2cf-881a0beb5e52">
+								<batch:step name="batch-step-for-draw" doc:id="2a870735-4fd5-4bf8-ae6d-0c3b1eca57db" acceptExpression='#[payload.drawExternalIDLanded != null  and payload.drawExternalIDLanded !="" and payload.drawExternalIDLanded != []  ]'>
+									<logger level="INFO" doc:name="Logger" doc:id="189510e8-a75f-4b83-9108-49a8e710c46e" message='#["\n Executing Batch Step : batch-step-for-draw"]' />
+									<ee:transform doc:name="Transform Message" doc:id="b31b8145-971b-422d-b2cf-881a0beb5e52">
 										<ee:message>
 											<ee:set-payload><![CDATA[%dw 2.0
 output application/json
@@ -148,14 +154,11 @@ output application/json
 payload]]></ee:set-payload>
 										</ee:message>
 									</ee:transform>
-									<ee:transform doc:name="base-part-query"
-										doc:id="28465806-e2e2-4fc1-940d-eb0e203cb942">
+									<ee:transform doc:name="base-part-query" doc:id="28465806-e2e2-4fc1-940d-eb0e203cb942">
 										<ee:message>
 										</ee:message>
 										<ee:variables>
-											<ee:set-variable
-												resource="dwl/var-base-compositeQuery34.dwl"
-												variableName="compositeQuery34" />
+											<ee:set-variable resource="dwl/var-base-compositeQuery34.dwl" variableName="compositeQuery34" />
 											<!-- <ee:set-variable
 												resource="dwl/var-base-compositeQuery1415.dwl"
 												variableName="compositeQuery1415" />-->
@@ -178,44 +181,36 @@ payload]]></ee:set-payload>
 											</salesforce-composite:execute-composite-request>
 										</route>
 									</scatter-gather> [STUDIO] -->
-									<ee:transform doc:name="Transform Message"
-										doc:id="61c60f0f-df2c-42ea-baaa-b0650a647614">
+									<ee:transform doc:name="Transform Message" doc:id="61c60f0f-df2c-42ea-baaa-b0650a647614">
 										<ee:message>
-											<ee:set-payload
-												resource="dwl/combined-base-compositeResponse.dwl" />
+											<ee:set-payload resource="dwl/combined-base-compositeResponse.dwl" />
 										</ee:message>
 										<ee:variables>
 										</ee:variables>
 									</ee:transform>
-									<batch:aggregator doc:name="Batch Aggregator"
-										doc:id="87ac4316-68ae-4bc3-90f4-ce02c366bf49" size="100">
-										<ee:transform doc:name="Transform Message"
-											doc:id="5bfd63ae-0e69-431c-acc7-ce74750cfa91">
+									<batch:aggregator doc:name="Batch Aggregator" doc:id="87ac4316-68ae-4bc3-90f4-ce02c366bf49" size="100">
+										<ee:transform doc:name="Transform Message" doc:id="5bfd63ae-0e69-431c-acc7-ce74750cfa91">
 											<ee:message>
-												<ee:set-payload ><![CDATA[%dw 2.0
+												<ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
 flatten(payload map read( $, 'application/json')) filter $.Id != null]]></ee:set-payload>
 											</ee:message>
-											<ee:variables >
-												<ee:set-variable variableName="aggregatorVar" ><![CDATA[%dw 2.0
+											<ee:variables>
+												<ee:set-variable variableName="aggregatorVar"><![CDATA[%dw 2.0
 output application/json
 ---
 flatten(payload map read( $, 'application/json'))]]></ee:set-variable>
 											</ee:variables>
 										</ee:transform>
-										<logger level="INFO" doc:name="Logger" doc:id="ebe08fe7-3a1d-4510-a1fb-561f9e22a9ea" message="#[%dw 2.0&#10;output application/json&#10;---&#10;payload]"/>
-										<salesforce:update doc:name="Update"
-											doc:id="e91909c7-a16a-4e6c-babe-1d930df5a07d"
-											config-ref="Salesforce_Config" type="${salesforce.object}">
-											<reconnect frequency="${salesforce.reconnection-frequency}" count="${salesforce.reconnection-attempts}"/>
+										<logger level="INFO" doc:name="Logger" doc:id="ebe08fe7-3a1d-4510-a1fb-561f9e22a9ea" message="#[%dw 2.0&#10;output application/json&#10;---&#10;payload]" />
+										<salesforce:update doc:name="Update" doc:id="e91909c7-a16a-4e6c-babe-1d930df5a07d" config-ref="Salesforce_Config" type="${salesforce.object}">
+											<reconnect frequency="${salesforce.reconnection-frequency}" count="${salesforce.reconnection-attempts}" />
 										</salesforce:update>
-										<logger level="INFO" doc:name="Logger"
-											doc:id="c1f24146-e138-486c-8c8d-550d08e18bc4"
-											message='#[%dw 2.0&#10;output application/json&#10;---&#10;if (payload.successful == true) {&#10;"partType Updated " : "Base Parts Pricebook Entry Updated",&#10;"Successful" : payload.successful,&#10;"Ids Updated": payload.items map ($.id )}&#10;else (payload.items map() -&gt; {&#10;	"partType Failed " : "Base Parts Pricebook Entry Failed",&#10;	failedId: $.id,&#10;	message: $.message&#10;	&#10;})]' />
-										<ee:transform doc:name="Transform Message" doc:id="afcbadd5-96a9-4c7a-9828-9fd0877eee75" >
-											<ee:message >
-												<ee:set-payload ><![CDATA[%dw 2.0
+										<logger level="INFO" doc:name="Logger" doc:id="c1f24146-e138-486c-8c8d-550d08e18bc4" message='#[%dw 2.0&#10;output application/json&#10;---&#10;if (payload.successful == true) {&#10;"partType Updated " : "Base Parts Pricebook Entry Updated",&#10;"Successful" : payload.successful,&#10;"Ids Updated": payload.items map ($.id )}&#10;else (payload.items map() -&gt; {&#10;	"partType Failed " : "Base Parts Pricebook Entry Failed",&#10;	failedId: $.id,&#10;	message: $.message&#10;	&#10;})]' />
+										<ee:transform doc:name="Transform Message" doc:id="afcbadd5-96a9-4c7a-9828-9fd0877eee75">
+											<ee:message>
+												<ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
 vars.aggregatorVar]]></ee:set-payload>
@@ -224,44 +219,48 @@ vars.aggregatorVar]]></ee:set-payload>
 									</batch:aggregator>
 								</batch:step>
 								<batch:step name="Batch_Step" doc:id="fc37fc3b-ac47-41e7-bf4b-53c03c6236eb" acceptPolicy="ONLY_FAILURES">
-									<ee:transform doc:name="Transform Message" doc:id="b3b3ff10-637e-43a6-b713-9b12413e9bb5" >
-										<ee:message >
-											<ee:set-payload ><![CDATA[%dw 2.0
+									<ee:transform doc:name="Transform Message" doc:id="b3b3ff10-637e-43a6-b713-9b12413e9bb5">
+										<ee:message>
+											<ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
 {"errorMessage":vars.'_mule_batch_INTERNAL_record'.stepExceptions.Batch_Step.cause.errorMessage.payload.error.errors.message[0]} ++ payload]]></ee:set-payload>
 										</ee:message>
 									</ee:transform>
 									<batch:aggregator doc:name="Batch Aggregator" doc:id="03359c20-8a76-41d5-a6b4-d24579726a05" size="100">
-										<ee:transform doc:name="Transform Message" doc:id="063a2a7c-df6d-4297-84c2-c5a1508edd38" >
-											<ee:message >
-												<ee:set-payload ><![CDATA[%dw 2.0
+										<ee:transform doc:name="Transform Message" doc:id="063a2a7c-df6d-4297-84c2-c5a1508edd38">
+											<ee:message>
+												<ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
 payload map read( $, 'application/json')]]></ee:set-payload>
 											</ee:message>
 										</ee:transform>
-										<logger level="INFO" doc:name="Logger" doc:id="1b456de8-7534-4858-b37a-6bc7d25944c1" message='"FAILED RECORDS  ==&gt; \n " ++ #[payload]'/>
+										<logger level="INFO" doc:name="Logger" doc:id="1b456de8-7534-4858-b37a-6bc7d25944c1" message='"FAILED RECORDS  ==&gt; \n " ++ #[payload]' />
 									</batch:aggregator>
 								</batch:step>
 							</batch:process-records>
 							<batch:on-complete>
-								<logger level="INFO" doc:name="Logger"
-									doc:id="4fb8b7ba-831f-48ef-ae0e-38182a77696c"
-									message='#[%dw 2.0&#10;output application/json&#10;---&#10;{"operationName" : "BASE BATCH RESPONSE : \n"} ++ payload]' />
+								<logger level="INFO" doc:name="Logger" doc:id="4fb8b7ba-831f-48ef-ae0e-38182a77696c" message='#[%dw 2.0&#10;output application/json&#10;---&#10;{"operationName" : "BASE BATCH RESPONSE : \n"} ++ payload]' />
 							</batch:on-complete>
 						</batch:job>
 					</route>
 					<route>
-						<batch:job jobName="batch-update-industry-part-price"
-							doc:id="a382c89b-7692-43aa-b66c-39ff49708e25" maxFailedRecords="-1">
+						<ee:transform doc:name="Transform Message" doc:id="cbac6302-33f1-49d4-b137-c5839a79aca5" >
+							<ee:message >
+								<ee:set-payload ><![CDATA[%dw 2.0
+output application/json skipNullOn="everywhere"
+---
+payload map (item) ->
+  if (item.srtxExternalIDLanded? )  item - "drawExternalIDLanded" else null ]]></ee:set-payload>
+							</ee:message>
+						</ee:transform>
+						<logger level="INFO" doc:name="Logger" doc:id="4b7f6056-21f3-4f21-b6ed-5d119760f94b" message="#[payload]"/>
+						<batch:job jobName="batch-update-industry-part-price" doc:id="a382c89b-7692-43aa-b66c-39ff49708e25" maxFailedRecords="-1">
 							<batch:process-records>
-								<batch:step name="batch-step-for-srtx"
-									doc:id="9db5bb9d-f3a7-433d-88f8-9b4b64add29a"
-									acceptExpression='#[payload.srtxExternalID != null  and payload.srtxExternalID !="" and payload.srtxExternalID != []  ]'>
-									<logger level="INFO" doc:name="Logger" doc:id="f82b25c6-5bc5-497c-9ada-3591bcb8f011" message='#["\n Executing Batch Step : batch-step-for-srtx"]'/>
-									<ee:transform doc:name="Transform Message"
-										doc:id="da349019-5f75-46d2-b95c-353d5cd58c93">
+								<batch:step name="batch-step-for-srtx" doc:id="9db5bb9d-f3a7-433d-88f8-9b4b64add29a" acceptExpression='#[payload.srtxExternalIDLanded != null  and payload.srtxExternalIDLanded !="" and payload.srtxExternalIDLanded != []  ]'>
+									<logger level="INFO" doc:name="Logger" doc:id="f82b25c6-5bc5-497c-9ada-3591bcb8f011" message='#["\n Executing Batch Step : batch-step-for-srtx"]' />
+									<ee:transform doc:name="Transform Message" doc:id="da349019-5f75-46d2-b95c-353d5cd58c93">
 										<ee:message>
 											<ee:set-payload><![CDATA[%dw 2.0
 output application/json
@@ -269,16 +268,13 @@ output application/json
 payload]]></ee:set-payload>
 										</ee:message>
 									</ee:transform>
-									<ee:transform doc:name="industry-part-query"
-										doc:id="a7596e22-104e-496c-ab16-240cef20d436">
+									<ee:transform doc:name="industry-part-query" doc:id="a7596e22-104e-496c-ab16-240cef20d436">
 										<ee:message />
 										<ee:variables>
 											<!-- <ee:set-variable
 												resource="dwl/var-srtx-compositeQuery1415.dwl"
 												variableName="compositeQuery1415" /> -->
-											<ee:set-variable
-												resource="dwl/var-strx-compositeQuery34.dwl"
-												variableName="compositeQuery34" />
+											<ee:set-variable resource="dwl/var-strx-compositeQuery34.dwl" variableName="compositeQuery34" />
 										</ee:variables>
 									</ee:transform>
 									<salesforce-composite:execute-composite-request doc:name="pricebookentry-id-3-" doc:id="5e21093c-2350-4cf0-898e-443865c966f0" config-ref="Salesforce_Composite_Config" target="compositeResponsePB34">
@@ -298,44 +294,35 @@ payload]]></ee:set-payload>
 											</salesforce-composite:execute-composite-request>
 										</route>
 									</scatter-gather> [STUDIO] -->
-									<ee:transform doc:name="Transform Message1"
-										doc:id="8c1a6061-2609-4c8d-875f-e372f47f3440">
+									<ee:transform doc:name="Transform Message1" doc:id="8c1a6061-2609-4c8d-875f-e372f47f3440">
 										<ee:message>
-											<ee:set-payload
-												resource="dwl/combined-srtx-compositeResponse.dwl" />
+											<ee:set-payload resource="dwl/combined-srtx-compositeResponse.dwl" />
 										</ee:message>
 										<ee:variables />
 									</ee:transform>
-									<batch:aggregator doc:name="Batch Aggregator"
-										doc:id="4f956870-49c1-4430-bc5e-59a96ee047c1" size="100">
-										<ee:transform doc:name="Transform Message"
-											doc:id="117094ba-61cd-4074-89bc-24ae0988485a">
+									<batch:aggregator doc:name="Batch Aggregator" doc:id="4f956870-49c1-4430-bc5e-59a96ee047c1" size="100">
+										<ee:transform doc:name="Transform Message" doc:id="117094ba-61cd-4074-89bc-24ae0988485a">
 											<ee:message>
 												<ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
 flatten(payload map read( $, 'application/json')) filter $.Id != null]]></ee:set-payload>
 											</ee:message>
-											<ee:variables >
-												<ee:set-variable variableName="aggregatorVar" ><![CDATA[%dw 2.0
+											<ee:variables>
+												<ee:set-variable variableName="aggregatorVar"><![CDATA[%dw 2.0
 output application/json
 ---
 flatten(payload map read( $, 'application/json'))]]></ee:set-variable>
 											</ee:variables>
 										</ee:transform>
-										<logger level="INFO" doc:name="Logger" doc:id="cfc945d5-8c05-423b-8f58-f018bdf06d0c" message="#[%dw 2.0&#10;output application/json&#10;---&#10;payload]"/>
-										<salesforce:update type="${salesforce.object}"
-											doc:name="Update-PricebookEntry"
-											doc:id="8863b7ad-185f-4a03-9c34-d46828b65776"
-											config-ref="Salesforce_Config" >
-											<reconnect frequency="${salesforce.reconnection-frequency}" count="${salesforce.reconnection-attempts}"/>
+										<logger level="INFO" doc:name="Logger" doc:id="cfc945d5-8c05-423b-8f58-f018bdf06d0c" message="#[%dw 2.0&#10;output application/json&#10;---&#10;payload]" />
+										<salesforce:update type="${salesforce.object}" doc:name="Update-PricebookEntry" doc:id="8863b7ad-185f-4a03-9c34-d46828b65776" config-ref="Salesforce_Config">
+											<reconnect frequency="${salesforce.reconnection-frequency}" count="${salesforce.reconnection-attempts}" />
 										</salesforce:update>
-										<logger level="INFO" doc:name="Logger"
-											doc:id="3ef26237-5c72-41e7-8768-a8e59fd94817"
-											message='#[%dw 2.0&#10;output application/json&#10;---&#10;if (payload.successful == true) {&#10;"partType Updated " : "Industry Parts Pricebook Entry Updated",&#10;"Successful" : payload.successful,&#10;"Ids Updated": payload.items map ($.id )}&#10;else (payload.items map() -&gt; {&#10;	"partType Failed " : "Industry Parts Pricebook Entry Failed",&#10;	failedId: $.id,&#10;	message: $.message&#10;	&#10;})]' />
-										<ee:transform doc:name="Transform Message" doc:id="1b34746d-f8ae-4790-9393-b6e4dda985f1" >
-											<ee:message >
-												<ee:set-payload ><![CDATA[%dw 2.0
+										<logger level="INFO" doc:name="Logger" doc:id="3ef26237-5c72-41e7-8768-a8e59fd94817" message='#[%dw 2.0&#10;output application/json&#10;---&#10;if (payload.successful == true) {&#10;"partType Updated " : "Industry Parts Pricebook Entry Updated",&#10;"Successful" : payload.successful,&#10;"Ids Updated": payload.items map ($.id )}&#10;else (payload.items map() -&gt; {&#10;	"partType Failed " : "Industry Parts Pricebook Entry Failed",&#10;	failedId: $.id,&#10;	message: $.message&#10;	&#10;})]' />
+										<ee:transform doc:name="Transform Message" doc:id="1b34746d-f8ae-4790-9393-b6e4dda985f1">
+											<ee:message>
+												<ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
 vars.aggregatorVar]]></ee:set-payload>
@@ -344,31 +331,29 @@ vars.aggregatorVar]]></ee:set-payload>
 									</batch:aggregator>
 								</batch:step>
 								<batch:step name="Batch_Step" doc:id="43d3378f-07ec-4dbd-9662-e0cbfdc485d7" acceptPolicy="ONLY_FAILURES">
-									<ee:transform doc:name="Transform Message" doc:id="f29ca756-1419-421a-b4d5-ff092be220c9" >
-										<ee:message >
-											<ee:set-payload ><![CDATA[%dw 2.0
+									<ee:transform doc:name="Transform Message" doc:id="f29ca756-1419-421a-b4d5-ff092be220c9">
+										<ee:message>
+											<ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
 payload]]></ee:set-payload>
 										</ee:message>
 									</ee:transform>
 									<batch:aggregator doc:name="Batch Aggregator" doc:id="e51e1643-a4d2-4301-992f-050b789b09f4" size="100">
-										<ee:transform doc:name="Transform Message" doc:id="b0089130-3e00-4c67-8cb3-c9f4d8d121ff" >
-											<ee:message >
-												<ee:set-payload ><![CDATA[%dw 2.0
+										<ee:transform doc:name="Transform Message" doc:id="b0089130-3e00-4c67-8cb3-c9f4d8d121ff">
+											<ee:message>
+												<ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
 payload map read( $, 'application/json')]]></ee:set-payload>
 											</ee:message>
 										</ee:transform>
-										<logger level="INFO" doc:name="Logger" doc:id="188f052e-a8aa-4690-b10b-884379dceaad" message='"FAILED RECORDS  ==&gt; \n " ++ #[payload]'/>
+										<logger level="INFO" doc:name="Logger" doc:id="188f052e-a8aa-4690-b10b-884379dceaad" message='"FAILED RECORDS  ==&gt; \n " ++ #[payload]' />
 									</batch:aggregator>
 								</batch:step>
 							</batch:process-records>
 							<batch:on-complete>
-								<logger level="INFO" doc:name="Logger"
-									doc:id="6af665ab-275d-4b95-ba76-8ba6332dcf38"
-									message='#[%dw 2.0&#10;output application/json&#10;---&#10;{"operationName" : "INDUSTRY BATCH RESPONSE : \n"} ++ payload]' />
+								<logger level="INFO" doc:name="Logger" doc:id="6af665ab-275d-4b95-ba76-8ba6332dcf38" message='#[%dw 2.0&#10;output application/json&#10;---&#10;{"operationName" : "INDUSTRY BATCH RESPONSE : \n"} ++ payload]' />
 							</batch:on-complete>
 						</batch:job>
 					</route>
