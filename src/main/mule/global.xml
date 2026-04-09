@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:email="http://www.mulesoft.org/schema/mule/email"
+<mule xmlns:tls="http://www.mulesoft.org/schema/mule/tls"
+	xmlns:email="http://www.mulesoft.org/schema/mule/email"
 	xmlns:salesforce-composite="http://www.mulesoft.org/schema/mule/salesforce-composite"
 	xmlns:db="http://www.mulesoft.org/schema/mule/db"
 	xmlns:os="http://www.mulesoft.org/schema/mule/os"
@@ -10,7 +11,8 @@
 	xmlns:http="http://www.mulesoft.org/schema/mule/http"
 	xmlns="http://www.mulesoft.org/schema/mule/core"
 	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
 http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd 
 http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd 
 http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
@@ -18,11 +20,13 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
 http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd
 http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
-http://www.mulesoft.org/schema/mule/salesforce-composite http://www.mulesoft.org/schema/mule/salesforce-composite/current/mule-salesforce-composite.xsd">
+http://www.mulesoft.org/schema/mule/salesforce-composite http://www.mulesoft.org/schema/mule/salesforce-composite/current/mule-salesforce-composite.xsd
+http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd">
 	<http:listener-config
 		name="ntn-pricebooks-sf-sapi-httpListenerConfig">
 		<http:listener-connection host="${http.host}"
-			port="${http.port}" readTimeout="${http.timeout}" />
+			port="${http.port}" readTimeout="${http.timeout}">
+		</http:listener-connection>
 	</http:listener-config>
 	<salesforce:sfdc-config name="Salesforce_Config"
 		doc:name="Salesforce Config"
@@ -32,8 +36,8 @@ http://www.mulesoft.org/schema/mule/salesforce-composite http://www.mulesoft.org
 			consumerSecret="${secure::sf.consumerSecret}"
 			username="${sf.username}" password="${secure::sf.password}"
 			securityToken="${secure::sf.securityToken}"
-			tokenEndpoint="${sf.tokenEndpoint}" >
-			<reconnection failsDeployment="true" >
+			tokenEndpoint="${sf.tokenEndpoint}">
+			<reconnection failsDeployment="true">
 				<reconnect-forever />
 			</reconnection>
 		</salesforce:oauth-user-pass-connection>
@@ -49,14 +53,6 @@ http://www.mulesoft.org/schema/mule/salesforce-composite http://www.mulesoft.org
 			</reconnection>
 		</db:oracle-connection>
 	</db:config>
-	<apikit:config name="ntn-pricebooks-jde-sf-sync-app"
-		api="ntn-pricebooks-jde-sf-sync-app.raml"
-		outboundHeadersMapName="outboundHeaders"
-		httpStatusVarName="httpStatus" >
-		<apikit:flow-mappings >
-			<apikit:flow-mapping resource="/pricebooks" action="post" content-type="application/json" flow-ref="post:\pricebooks:application\json:ntn-pricebooks-sf-sapi-config" />
-		</apikit:flow-mappings>
-	</apikit:config>
 	<configuration-properties
 		doc:name="Configuration properties"
 		doc:id="21402cc1-df9c-4937-a67e-bb647c24b04b"
@@ -82,8 +78,16 @@ http://www.mulesoft.org/schema/mule/salesforce-composite http://www.mulesoft.org
 		doc:id="9b7b3ede-cfaf-4d4f-8e92-53aa25bd7bcf" entryTtl="3"
 		entryTtlUnit="DAYS" expirationIntervalUnit="DAYS"
 		config-ref="ObjectStore_Config" />
-	<salesforce-composite:composite-config name="Salesforce_Composite_Config" doc:name="Salesforce Composite Config" doc:id="591336b2-19dd-4712-932c-f78bb2359df1" >
-		<salesforce-composite:oauth-user-pass-connection consumerKey="${secure::sf.consumerKey}" consumerSecret="${secure::sf.consumerSecret}" username="${sf.username}" password="${secure::sf.password}" securityToken="${secure::sf.securityToken}" tokenEndpoint="${sf.tokenEndpoint}" />
+	<salesforce-composite:composite-config
+		name="Salesforce_Composite_Config"
+		doc:name="Salesforce Composite Config"
+		doc:id="591336b2-19dd-4712-932c-f78bb2359df1">
+		<salesforce-composite:oauth-user-pass-connection
+			consumerKey="${secure::sf.consumerKey}"
+			consumerSecret="${secure::sf.consumerSecret}"
+			username="${sf.username}" password="${secure::sf.password}"
+			securityToken="${secure::sf.securityToken}"
+			tokenEndpoint="${sf.tokenEndpoint}" />
 	</salesforce-composite:composite-config>
 	<email:smtp-config name="NTN-SMTP"
 		doc:name="Email SMTP" doc:id="29450aaa-9843-4a1f-ab0a-e334a9564319">
@@ -96,4 +100,5 @@ http://www.mulesoft.org/schema/mule/salesforce-composite http://www.mulesoft.org
 			</email:properties>
 		</email:smtp-connection>
 	</email:smtp-config>
+
 </mule>

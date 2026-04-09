@@ -53,4 +53,6 @@ http:
   retryCount: "5"
   retryFrequency: "3000"
   ResponseTimeout: "90000000"
-    
+  
+pricebooks:
+  initialState : "started"
